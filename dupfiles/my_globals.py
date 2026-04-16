@@ -11,10 +11,10 @@ def get_options():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="""
           Scans one or more directory trees for file duplicates and outputs
-          theit pathes as groupwise to stdout. Example output:
+          their pathes groupwise to stdout. Example output:
 
-           grp00000:     2956 "./condainstallinfo.ipynb"
-           grp00000:     2956 "./.ipynb/condainstallinfo-checkpoint.ipynb"
+           bin00000:     2956 "./condainstallinfo.ipynb"
+           bin00000:     2956 "./.ipynb/condainstallinfo-checkpoint.ipynb"
 
           First col  : the group-id : f'grp{id:05d}'
           Second col : shows the file size
