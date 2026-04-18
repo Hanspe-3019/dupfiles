@@ -54,8 +54,8 @@ class FileDupes:
     def print_dupgroups(self):
         """ Ausgabe der ermittelten Duplikatgruppen auf stdout
         """
-        for i, bin in enumerate(self.bins):
-            for fileinfo in bin:
+        for i, the_bin in enumerate(self.bins):
+            for fileinfo in the_bin:
                 print(
                     f'bin{i:05d}:{fileinfo.size:9d} "{fileinfo.path}"'
                 )
@@ -65,10 +65,41 @@ class FileDupes:
         Ausgabe von Statistiken
         """
         dup_sizes = 0
-        for bin in self.bins:
-            size = bin[0].size
-            dup_sizes += size * (len(bin) - 1)
-        sayit(f"Sum of duplicate sizes: {dup_sizes}")
+        dir_to_others = defaultdict(set)
+        for the_bin in self.bins:
+            size = the_bin[0].size
+            dup_sizes += size * (len(the_bin) - 1)
+            dirs = set(
+                fileinfo.path.parent for fileinfo in the_bin
+            )
+            for the_dir in dirs:
+                for other in dirs:
+                    if other != the_dir: 
+                        dir_to_others[the_dir].add(other)
+
+
+        sayit(f"Sum of duplicate's sizes: {dup_sizes}", prefix='Stats  A')
+
+        files_in_dir = Fileinfo.get_files_in_dir()
+        dups_in_dir = defaultdict(int)
+
+        for the_bin in self.bins:
+            for fileinfo in the_bin:
+                its_dir = fileinfo.path.parent
+                dups_in_dir[its_dir] += 1
+
+        indent = ' '*10 + '-> '
+        for the_dir, dups in dups_in_dir.items():
+
+                its_count_of_files = files_in_dir[the_dir]
+                sayit(
+                    f'{dups:6d}'
+                    f'{its_count_of_files:6d}'
+                    f' {the_dir}',
+                    prefix='Stats  B',
+                )
+                for other in dir_to_others[the_dir]:
+                    sayit(f'{indent}{other}', prefix='Stats  B')
 
 
 
@@ -77,7 +108,8 @@ def main():
     """
     dupes = FileDupes()
     dupes.print_statistics()
-    dupes.print_dupgroups()
+    if OPT.dump:
+        dupes.print_dupgroups()
 
 if __name__ == '__main__':
     main()
