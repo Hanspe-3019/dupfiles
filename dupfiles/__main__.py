@@ -7,8 +7,7 @@ https://github.com/mumbly/PyUtils/blob/master/FileDupeFinder.py
 """
 from collections import defaultdict
 
-from tqdm import tqdm
-
+from . my_globals import tqdm
 from . my_globals import OPT, sayit
 from . fileinfo import Fileinfo
 from . finddupes import get_dupgroups
@@ -51,10 +50,12 @@ class FileDupes:
             progress_bar.set_postfix_str('finished')
 
 
-    def print_dupgroups(self):
+    def print_dupgroups(self, glob):
         """ Ausgabe der ermittelten Duplikatgruppen auf stdout
         """
         for i, the_bin in enumerate(self.bins):
+            if not any( fileinfo.matches(glob) for fileinfo in the_bin ):
+                continue
             for fileinfo in the_bin:
                 print(
                     f'bin{i:05d}:{fileinfo.size:9d} "{fileinfo.path}"'
@@ -108,8 +109,8 @@ def main():
     """
     dupes = FileDupes()
     dupes.print_statistics()
-    if OPT.dump:
-        dupes.print_dupgroups()
+    if OPT.dump != '':
+        dupes.print_dupgroups(OPT.dump)
 
 if __name__ == '__main__':
     main()

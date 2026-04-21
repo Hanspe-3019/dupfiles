@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from collections import defaultdict
 import hashlib
 
-from tqdm import tqdm
-
+from . my_globals import tqdm
 from . my_globals import OPT, sayit
 
 files_in_directory = {} # Path -> Anzahl files
@@ -38,6 +37,11 @@ class Fileinfo:
                 md5.update(chunk)
         return md5.hexdigest()
 
+    def matches(self, glob):
+        if not glob.startswith('/'): # relative glob pattern
+            glob = f'/**/{glob}'
+        return self.path.full_match(glob)
+
     @staticmethod
     def walk_tree(from_path):
         '''
@@ -53,7 +57,9 @@ class Fileinfo:
 
                 files_in_directory[root.absolute()] = len(files)
 
-                for cur_file in files:
+                fileset = set(files).difference(OPT.exclude_files)
+
+                for cur_file in fileset:
                     t.update(1)
                     cur_path = root / cur_file
                     try:
